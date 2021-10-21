@@ -1,9 +1,4 @@
-const { Pool } = require('pg');
-
-const pool = new Pool({
-  connectionString:
-    'postgres://eogcopiq:EhhVSDBZVcE9xWjnixeC_0auXxbq9q4g@fanny.db.elephantsql.com/eogcopiq'
-});
+const pool = require('../models/model');
 
 const controller = {};
 
@@ -12,7 +7,6 @@ controller.postOnePerson = async (req, res, next) => {
   try {
     // req.body is an object of 1 key value pair
     const { first_name, last_name } = req.body;
-    const values = [first_name, last_name];
 
     // inserts record with auto generated primary key
     const myQuery = `
@@ -26,7 +20,7 @@ controller.postOnePerson = async (req, res, next) => {
     `;
 
     // res.locals.rows is []
-    const { rows } = await pool.query(myQuery, values);
+    const { rows } = await pool.query(myQuery, [first_name, last_name]);
     res.locals.rows = rows;
     next();
   } catch (error) {
@@ -40,10 +34,10 @@ controller.getOnePerson = async (req, res, next) => {
   try {
     // req.params.id is a number
     const id = req.params.id;
-    const myQuery = `SELECT * FROM people WHERE id = ${id};`;
+    const myQuery = `SELECT * FROM people WHERE id = $1;`;
 
     // res.locals.rows is [{"id":1, "first_name": "sheila", "last_name": "wang"}]
-    const { rows } = await pool.query(myQuery);
+    const { rows } = await pool.query(myQuery, [id]);
     res.locals.rows = rows;
     next();
   } catch (error) {
@@ -77,11 +71,11 @@ controller.putOnePerson = async (req, res, next) => {
     const myQuery = `
       UPDATE people 
       SET first_name = '${first_name}', last_name = '${last_name}'
-      WHERE id = ${id};
+      WHERE id = $1;
       `;
 
     // res.locals.rows is []
-    const { rows } = await pool.query(myQuery);
+    const { rows } = await pool.query(myQuery, [id]);
     res.locals.rows = rows;
     next();
   } catch (error) {
@@ -95,10 +89,10 @@ controller.deleteOnePerson = async (req, res, next) => {
   try {
     // req.params.id is a number
     const id = req.params.id;
-    const myQuery = `DELETE FROM people WHERE id = ${id};`;
+    const myQuery = `DELETE FROM people WHERE id = $1;`;
 
     // res.locals.rows is []
-    const { rows } = await pool.query(myQuery);
+    const { rows } = await pool.query(myQuery, [id]);
     res.locals.rows = rows;
     next();
   } catch (error) {
@@ -107,11 +101,33 @@ controller.deleteOnePerson = async (req, res, next) => {
   }
 };
 
-// DELETE all people
+/*
+// DELETE all people, has bugs
 controller.deleteAllPeople = async (req, res, next) => {
   try {
     // req.body is an array of ids
     const arrayOfId = req.body;
+
+    console.log('arrayOfId', arrayOfId);
+    // res.locals.rows is []
+    const myQuery = `DELETE FROM people WHERE id IN ($1:list);`;
+    const { rows } = await pool.query(myQuery, [arrayOfId]);
+    res.locals.rows = rows;
+    next();
+  } catch (error) {
+    console.log('my error', error);
+    next(error);
+  }
+};
+*/
+
+/*
+// DELETE all people, not sanitized
+controller.deleteAllPeople = async (req, res, next) => {
+  try {
+    // req.body is an array of ids
+    const arrayOfId = req.body;
+
     let myString = '';
 
     for (let index = 0; index < arrayOfId.length; index++) {
@@ -122,8 +138,9 @@ controller.deleteAllPeople = async (req, res, next) => {
       }
     }
 
+    console.log('arrayOfId', arrayOfId);
     // res.locals.rows is []
-    const myQuery = `DELETE FROM people WHERE id IN (${myString});`;
+    const myQuery = `DELETE FROM people WHERE id IN (myString);`;
     const { rows } = await pool.query(myQuery);
     res.locals.rows = rows;
     next();
@@ -132,5 +149,6 @@ controller.deleteAllPeople = async (req, res, next) => {
     next(error);
   }
 };
+*/
 
 module.exports = controller;

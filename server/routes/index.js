@@ -2,37 +2,35 @@ var express = require('express');
 var router = express.Router();
 const controller = require('../controllers/controller');
 
-// POST one person
-router.post('/people', controller.postOnePerson, (req, res) => 
+// POST person
+router.post('/people', controller.postPerson, (req, res) => 
   res.status(200).json(res.locals.rows)
 );
 
-// GET one person
-router.get('/people/:id', controller.getOnePerson, (req, res) => 
+// GET person
+router.get('/people/:id', controller.getPerson, (req, res) => 
   res.status(200).json(res.locals.rows)
 );
 
-// GET all people
-router.get('/people', controller.getAllPeople, (req, res) =>
+// GET people
+router.get('/people', controller.getPeople, (req, res) =>
   res.status(200).json(res.locals.rows)
 );
 
-// PUT one person
-router.put('/people', controller.putOnePerson, (req, res) => 
+// PUT person
+router.put('/people', controller.putPerson, (req, res) => 
   res.status(200).json(res.locals.rows)
 );
 
-// DELETE one person
-router.delete('/people/:id', controller.deleteOnePerson, (req, res) =>
+// DELETE person
+router.delete('/people/:id', controller.deletePerson, (req, res) =>
   res.status(200).json(res.locals.rows)
 );
 
-/*
-// DELETE all people
+// DELETE people
 router.delete('/people', controller.deleteAllPeople, (req, res) => 
   res.status(200).json(res.locals.rows)
 );
-*/
 
 router.get(
   '/',

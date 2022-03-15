@@ -2,11 +2,12 @@ const pool = require('../models/model');
 
 const controller = {};
 
-// POST one person
-controller.postOnePerson = async (req, res, next) => {
+// POST person
+controller.postPerson = async (req, res, next) => {
   try {
     // req.body is an object of 1 key value pair
     const { first_name, last_name } = req.body;
+    console.log('request body', req);
 
     // inserts record with auto generated primary key
     const myQuery = `
@@ -19,18 +20,21 @@ controller.postOnePerson = async (req, res, next) => {
       );
     `;
 
-    // res.locals.rows is []
-    const { rows } = await pool.query(myQuery, [first_name, last_name]);
-    res.locals.rows = rows;
+    // res.locals.rows is [] from sql database
+    // const { rows } = await pool.query(myQuery, [first_name, last_name]);
+    await pool.query(myQuery, [first_name, last_name]);
+    // res.locals.rows = rows;
+    res.locals.rows = req.body;
     next();
+
   } catch (error) {
     console.log('my error', error);
     next(error);
   }
 };
 
-// GET one person
-controller.getOnePerson = async (req, res, next) => {
+// GET person
+controller.getPerson = async (req, res, next) => {
   try {
     // req.params.id is a number
     const id = req.params.id;
@@ -40,30 +44,36 @@ controller.getOnePerson = async (req, res, next) => {
     const { rows } = await pool.query(myQuery, [id]);
     res.locals.rows = rows;
     next();
+
   } catch (error) {
     console.log('my error', error);
     next(error);
   }
 };
 
-// GET all people
-controller.getAllPeople = async (req, res, next) => {
+// GET people
+controller.getPeople = async (req, res, next) => {
   try {
     // there is nothing on req
     const myQuery = `SELECT * FROM people;`;
 
-    // res.locals.rows is [{"id":1, "first_name": "sheila", "last_name": "wang"}]
+    /* 
+    res.locals.rows is 
+    [{"id":1, "first_name": "sheila", "last_name": "wang"},
+    {"id":2, "first_name": "jeremy", "last_name": "rempel"}]
+    */
     const { rows } = await pool.query(myQuery);
     res.locals.rows = rows;
     next();
+
   } catch (error) {
     console.log('my error', error);
     next(error);
   }
 };
 
-// PUT one person
-controller.putOnePerson = async (req, res, next) => {
+// PUT person
+controller.putPerson = async (req, res, next) => {
   try {
     // req.body is an object of key value pairs
     const { id, first_name, last_name } = req.body;
@@ -78,31 +88,32 @@ controller.putOnePerson = async (req, res, next) => {
     const { rows } = await pool.query(myQuery, [id]);
     res.locals.rows = rows;
     next();
+
   } catch (error) {
     console.log('my error', error);
     next(error);
   }
 };
 
-// DELETE one person
-controller.deleteOnePerson = async (req, res, next) => {
+// DELETE person
+controller.deletePerson = async (req, res, next) => {
   try {
-    // req.params.id is a number
-    const id = req.params.id;
+    // req.params.id is a string, must coerce to number
+    const id = Number(req.params.id);
     const myQuery = `DELETE FROM people WHERE id = $1;`;
 
     // res.locals.rows is []
     const { rows } = await pool.query(myQuery, [id]);
     res.locals.rows = rows;
     next();
+
   } catch (error) {
     console.log('my error', error);
     next(error);
   }
 };
 
-/*
-// DELETE all people, has bugs
+// DELETE people, has bugs
 controller.deleteAllPeople = async (req, res, next) => {
   try {
     // req.body is an array of ids
@@ -114,12 +125,12 @@ controller.deleteAllPeople = async (req, res, next) => {
     const { rows } = await pool.query(myQuery, [arrayOfId]);
     res.locals.rows = rows;
     next();
+
   } catch (error) {
     console.log('my error', error);
     next(error);
   }
 };
-*/
 
 /*
 // DELETE all people, not sanitized
